@@ -1,0 +1,68 @@
+Super_User: vedant, adminpassword
+Changes:
+1.Auth Token:
+    Added token in installed apps
+    Installed Token in apps/user.py
+    Installed TokenAuthentication in app/user.py
+
+Deleted:
+User:1,2,3
+Posts:
+
+DB SCHEMA
+56:14
+TABLES
+1. User
+2. Post
+3. PostComment
+4. PostLike
+5. Follow
+
+User Table
+1. id(PK)
+2. email
+3. username
+4. password
+5. first_name
+6. last_name
+7. created_at
+8. updated_at
+
+APIs for User Model:
+1. register
+2. login
+3. get user by id 
+4. follow/unfollow user
+
+Post Table:
+1.id
+2.title
+3.descripiition
+4.created_at
+5.updated_at
+6.user
+
+APIs for Post Model:
+1.CRUD Post
+2.like/unlike Post
+3.comment on a Post
+
+PostLike Table:
+1.post 
+2.user
+
+Comment Table:
+1.id 
+2.comment_text
+3.user
+4.created_at
+5.updated_at
+
+Follow Table:
+1. id
+2. user
+3. follows_id
+
+APIs for Follow Table:
+1.follow/unfollow a user
+2. get list of followers
