@@ -146,37 +146,37 @@ class DestroyUser(generics.DestroyAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def destroy(self, request, pk):
-        try:
-            user = User.objects.get(id=pk)
-            if pk == request.user.id:
-                self.perform_destroy(request.user)
-                return Response({"success": True, "message":"user deleted"})
-            else:
-                return Response({"success": False, "message":"not enough permissions"})
-        except ObjectDoesNotExist:
-            return Response({"success": False, "message":"user does not exist"})
-
     # def destroy(self, request, pk):
-    #         try:
-    #             user = User.objects.get(id=pk)
-    #             print(user.password)
-    #             if user.id == request.user.id:
-    #                 password = request.data.get('password')
-    #                 if not password:
-    #                     return Response({"success": False, "message": "Password is required."})
+    #     try:
+    #         user = User.objects.get(id=pk)
+    #         if pk == request.user.id:
+    #             self.perform_destroy(request.user)
+    #             return Response({"success": True, "message":"user deleted"})
+    #         else:
+    #             return Response({"success": False, "message":"not enough permissions"})
+    #     except ObjectDoesNotExist:
+    #         return Response({"success": False, "message":"user does not exist"})
 
-    #                 print(password)
+    def destroy(self, request, pk):
+            try:
+                user = User.objects.get(id=pk)
+                print(user.password)
+                if user.id == request.user.id:
+                    password = request.data.get('password')
+                    if not password:
+                        return Response({"success": False, "message": "Password is required."})
 
-    #                 if user.check_password(password):
-    #                     self.perform_destroy(request.user)
-    #                     return Response({"success": True, "message": "User deleted"})
-    #                 else:
-    #                     return Response({"success": False, "message": "Password is incorrect."})
-    #             else:
-    #                 return Response({"success": False, "message": "Not enough permissions"})
-    #         except ObjectDoesNotExist:
-    #             return Response({"success": False, "message": "User does not exist"})
+                    print(password)
+
+                    if user.password == password:
+                        self.perform_destroy(request.user)
+                        return Response({"success": True, "message": "User deleted"})
+                    else:
+                        return Response({"success": False, "message": "Password is incorrect."})
+                else:
+                    return Response({"success": False, "message": "Not enough permissions"})
+            except ObjectDoesNotExist:
+                return Response({"success": False, "message": "User does not exist"})
 
 class FollowUser(APIView):
     queryset = UserFollow.objects.all()

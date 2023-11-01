@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import EmailPopup from "../utils/EmailPopup"
 
 function SignIn() {
+  const [isClicked, setIsClicked] = useState(false);
   const [state, setState] = useState({
     email: "",
     password: ""
@@ -17,6 +19,14 @@ function SignIn() {
       [name]: value
     });
   };
+
+  const openEmailPopup = () => {
+    setIsClicked(true)
+  }
+
+  const closeEmailPopup = () => {
+    setIsClicked(false)
+  }
 
   const handleOnSubmit = (evt) => {
     evt.preventDefault();
@@ -87,6 +97,10 @@ function SignIn() {
         >
           Sign In
         </button>
+        <p className="p-2 text-sm">Forget Your Password? <button className="text-[14px]" onClick={openEmailPopup}>Click Here</button></p>
+        {isClicked && <EmailPopup
+                        isOpen={isClicked}
+                        onClose={closeEmailPopup}/>}
         {responseMessage && <p className="text-red-500 mt-2">{responseMessage}</p>}
       </form>
     </div>
