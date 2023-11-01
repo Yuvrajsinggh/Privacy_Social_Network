@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const ForgetPasswordForm = () => {
+  const navigate = useNavigate("")
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMatchError, setPasswordMatchError] = useState('');
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const sessionToken = userData ? userData.token : null;
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    // Add validation logic to check if passwords match
     if (newPassword !== confirmPassword) {
       setPasswordMatchError("Passwords don't match");
     } else {
-      // Reset the error if the passwords match
-      setPasswordMatchError('');
-      // You can submit the form data to your backend for password reset here
+      const response = await axios.put('http://127.0.0.1:8000/user/update/', {password: newPassword}, {
+        headers: {
+          Authorization: `Token ${sessionToken}`,
+        },
+      }); 
+      if (response.data.success) {
+        navigate("/login")
+      } else {
+        console.error(response.data.message);
+      }
+
     }
+
+    
   };
 
   return (

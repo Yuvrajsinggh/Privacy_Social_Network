@@ -1,13 +1,38 @@
 import React, { useState } from 'react'
 import { Input, Button } from "@material-tailwind/react";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Account = () => {
     const [password, setPassword] =useState("");
     const [clicked, setClicked] = useState(false)
     const onChange = ({ target }) => setPassword(target.value);
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const sessionToken = userData ? userData.token : null;
+    const navigate = useNavigate("")
 
-    const handleSubmit = () => {
-        console.log("Deleted");
+    const handleSubmit = async () => {
+
+      const userResponse = await axios.get('http://127.0.0.1:8000/user/current/', {
+        headers: {
+          Authorization: `Token ${sessionToken}`,
+        },
+      });
+      const userId = userResponse.data.id;
+
+      axios.delete(`http://127.0.0.1:8000/user/delete/${userId}/`, {
+        data: { password },  
+        headers: {
+          Authorization: `Token ${sessionToken}`,
+        },
+      }).then((response) => {
+        if (response.data.success) {
+          navigate("/login");
+        }
+      })
+      .catch((error) => {
+        console.error("Delete request error:", error);
+      });
         setPassword("")
         setClicked(true)
     }

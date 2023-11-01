@@ -33,7 +33,7 @@ const CreatePostPopup = ({ isOpen, onClose, onCreatePost }) => {
       })
       .then((response) => {
         // Handle success
-        console.log('Post created:', response.data);
+        alert("Post Created || Please refresh once")
 
         // Call the onCreatePost callback function if needed
         if (onCreatePost) {

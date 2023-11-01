@@ -7,6 +7,7 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     username = models.CharField(unique=True, max_length=16)
+    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     privacy_status = models.BooleanField(default=False)
     anonymous_name = models.CharField(null=True, max_length=30)
 

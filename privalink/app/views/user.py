@@ -2,14 +2,17 @@ from rest_framework import generics
 from rest_framework.views import APIView
 import random
 import string
+import requests
 from app.serializer import UserSerializer, UserLoginSerializer, UserFollowSerializer
 from app.models import User, UserFollow 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.contrib.auth import authenticate
 
 from rest_framework.authtoken.models import Token
 
@@ -48,6 +51,20 @@ class CreateUser(generics.CreateAPIView):
             # Check if a user with this anonymous name already exists
             if not User.objects.filter(anonymous_name=name).exists():
                 return name
+
+class ImageUpload(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        profile_picture = request.data.get('profile_picture')
+        user = request.user
+
+        if profile_picture:
+            user.profile_picture = profile_picture
+            user.save()
+            return Response({'message': 'Profile picture uploaded successfully.'})
+        else:
+            return Response({'message': 'Invalid file.'}, status=400)
 
 class LoginUserView(APIView):
 
@@ -98,7 +115,7 @@ class RetrieveUsers(generics.ListAPIView):
         username = request.query_params.get('username', None)
 
         if not name and not username:
-            return Response({"success": False, "message": "Provide a name or username to search."}, status=400)
+            return Response({"success": False, "message": "Provide a name or full username to search."}, status=400)
 
         users = User.objects.filter(Q(first_name__iexact=name) | Q(username__iexact=username))
 
@@ -139,6 +156,27 @@ class DestroyUser(generics.DestroyAPIView):
                 return Response({"success": False, "message":"not enough permissions"})
         except ObjectDoesNotExist:
             return Response({"success": False, "message":"user does not exist"})
+
+    # def destroy(self, request, pk):
+    #         try:
+    #             user = User.objects.get(id=pk)
+    #             print(user.password)
+    #             if user.id == request.user.id:
+    #                 password = request.data.get('password')
+    #                 if not password:
+    #                     return Response({"success": False, "message": "Password is required."})
+
+    #                 print(password)
+
+    #                 if user.check_password(password):
+    #                     self.perform_destroy(request.user)
+    #                     return Response({"success": True, "message": "User deleted"})
+    #                 else:
+    #                     return Response({"success": False, "message": "Password is incorrect."})
+    #             else:
+    #                 return Response({"success": False, "message": "Not enough permissions"})
+    #         except ObjectDoesNotExist:
+    #             return Response({"success": False, "message": "User does not exist"})
 
 class FollowUser(APIView):
     queryset = UserFollow.objects.all()

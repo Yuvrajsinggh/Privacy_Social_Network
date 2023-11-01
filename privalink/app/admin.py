@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import User, Post, PostLike, PostComment, PostReport 
+from .models import User, Post, PostLike, PostComment, PostReport, UserFollow 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id','email','username','password','first_name','last_name', 'anonymous_name', 'privacy_status')
+    list_display = ('id','email','username','password','first_name','last_name', 'anonymous_name', 'profile_picture', 'privacy_status')
 
 admin.site.register(User, UserAdmin)
 
@@ -25,3 +25,8 @@ class PostReportAdmin(admin.ModelAdmin):
     list_display = ('post','user')
 
 admin.site.register(PostReport, PostReportAdmin)
+
+class UserFollowAdmin(admin.ModelAdmin):
+    list_display = ('user','follows_id')
+
+admin.site.register(UserFollow, UserFollowAdmin)

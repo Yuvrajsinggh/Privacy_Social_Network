@@ -131,9 +131,9 @@ const Post = ({ post, postId }) => {
         })
         .then((response) => {
           if (response.data.success) {
-            
+            alert("Post Deleted | Please Refresh once")
           } else {
-            console.log(response.data.message)
+            alert("You can't delete other user post")
           }
         })
         .catch((error) => {
@@ -142,83 +142,88 @@ const Post = ({ post, postId }) => {
     }
   };
 
-  useEffect(() => {
-    getLike()
-  },[])
-
   return (
-    <div className="border-t-[2px] hover:bg-gray-200 transition-colors duration-500 ease-out px-4 pt-3 pb-2">
-      <div className="flex gap-1 items-center">
-        <Avatar src={post.image} alt="avatar" size='sm' className={`${post.anonymous_status ? 'hidden' : 'block'}`} />
-        <Typography variant="small" color="gray" className={`${post.anonymous_status ? 'font-bold text-md' : 'font-normal'}`}>
-          @{post.user}
-        </Typography>
+    <>
+      <div className="border-t-[2px] hover:bg-gray-200 transition-colors duration-500 ease-out px-4 pt-3 pb-2">
+
+        <div className="flex gap-1 items-center">
+          <Avatar src={"http://127.0.0.1:8000" + post.user_profile_picture} alt="avatar" size='md' className={`${post.anonymous_status ? 'hidden' : 'block'}`} />
+          <Typography variant="lead" color="current" className={`${post.anonymous_status ? 'hidden' : 'font-bold'}`}>
+            {post.display_name}
+          </Typography>
+          <Typography variant="paragraph" color="gray" className={`${post.anonymous_status ? 'font-bold text-md text-black' : 'font-normal'}`}>
+            @{post.user}
+          </Typography><span className='font-bold'>.</span>
+          <Typography variant="small" color="gray">
+          {post.created_at}
+          </Typography>
+        </div>
+        <p className="text-gray-600 mt-2">{post.description}</p>
+
+        <div className="mt-4 flex justify-between">
+          <div className='flex items-center group' onClick={handleLike}>
+            <Rune
+              Icon={<LikeIcon fill="group-hover:fill-red-500" />}
+              color="group-hover:bg-red-100"
+            />
+            <span className="group-hover:text-red-500">{likeCount}</span>
+          </div>
+          <div className="flex items-center group" onClick={handleCommentClick}>
+            <Rune
+              Icon={<ReplyIcon fill="group-hover:fill-red-500" />}
+              color="group-hover:bg-red-100"
+            />
+            <span className="group-hover:text-red-500">{commentCount}</span>
+          </div>
+          <div className="flex items-center group" onClick={handleReport}>
+            <Rune
+              Icon={<ReportIcon fill="group-hover:fill-red-500" />}
+              color="group-hover:bg-red-100"
+            />
+            {reported ? (
+              <span className="group-hover:text-red-500">Reported</span>
+            ) : (
+              <span>Report</span>
+            )}
+          </div>
+          <div className="flex items-center group" onClick={handleDelete}>
+            <Rune
+              Icon={<DeleteIcon fill="group-hover:fill-red-500" />}
+              color="group-hover:bg-red-100"
+            />
+          </div>
+        </div>
+
+        {showCommentBox && (
+          <div className="mt-4">
+            <input
+              type="text"
+              className="border rounded-md p-2 w-full"
+              placeholder="Add a comment"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+              onClick={handleAddComment}
+            >
+              Add Comment
+            </button>
+          </div>
+        )}
+
+        {comments.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold">Comments:</h3>
+            <ul>
+              {comments.map((comment) => (
+                <li key={comment.id} className="mt-2">{comment}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-      <p className="text-gray-600 mt-2">{post.description}</p>
-
-      <div className="mt-4 flex justify-between">
-        <div className='flex items-center group' onClick={handleLike}>
-          <Rune
-            Icon={<LikeIcon fill="group-hover:fill-red-500" />}
-            color="group-hover:bg-red-100"
-          />
-          <span className="group-hover:text-red-500">{likeCount}</span>
-        </div>
-        <div className="flex items-center group" onClick={handleCommentClick}>
-          <Rune
-            Icon={<ReplyIcon fill="group-hover:fill-red-500" />}
-            color="group-hover:bg-red-100"
-          />
-          <span className="group-hover:text-red-500">{commentCount}</span>
-        </div>
-        <div className="flex items-center group" onClick={handleReport}>
-          <Rune
-            Icon={<ReportIcon fill="group-hover:fill-red-500" />}
-            color="group-hover:bg-red-100"
-          />
-          {reported ? (
-            <span className="group-hover:text-red-500">Reported</span>
-          ) : (
-            <span>Report</span>
-          )}
-        </div>
-        <div className="flex items-center group" onClick={handleDelete}>
-          <Rune
-            Icon={<DeleteIcon fill="group-hover:fill-red-500" />}
-            color="group-hover:bg-red-100"
-          />
-        </div>
-      </div>
-
-      {showCommentBox && (
-        <div className="mt-4">
-          <input
-            type="text"
-            className="border rounded-md p-2 w-full"
-            placeholder="Add a comment"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-          />
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
-            onClick={handleAddComment}
-          >
-            Add Comment
-          </button>
-        </div>
-      )}
-
-      {comments.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Comments:</h3>
-          <ul>
-            {comments.map((comment) => (
-              <li key={comment.id} className="mt-2">{comment}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

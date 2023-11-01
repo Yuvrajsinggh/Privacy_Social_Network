@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path
 from app.views.user import CreateUser, LoginUserView, LogoutView, RetrieveUser, GetCurrentUser, RetrieveUsers, UpdateUser, DestroyUser, FollowUser, GetUserFollowCounts, ForgotPasswordView
-from app.views.post import CreatePost,RetrievePosts , RetrievePost, RetrieveAnonymousPosts, UpdatePost, DestroyPost, RetieveUserPosts, LikePost, GetPostLikes, CommentPost, ReportPost
+from app.views.post import CreatePost,RetrievePosts , RetrievePost, RetrieveAnonymousPosts, UpdatePost, DestroyPost, RetieveUserPosts, LikePost, GetPostLikes, CommentPost, ReportPost, RetrieveOtherUserPosts
 from app.views.chat import start_convo, get_conversation, conversations, SendGroupMessageView, GroupInboxView, CreateGroupView, ListGroupsView
 # from app.form import CustomPasswordResetForm
 urlpatterns = [
@@ -20,6 +20,7 @@ urlpatterns = [
     path('posts/general/', RetrievePosts.as_view()),
     path('posts/anonymous/', RetrieveAnonymousPosts.as_view()),
     path('posts/userposts/', RetieveUserPosts.as_view()),
+    path('posts/otheruserposts/<int:pk>/', RetrieveOtherUserPosts.as_view()),
     path('post/create/', CreatePost.as_view()),
     path('post/<int:pk>/', RetrievePost.as_view()), 
     path('post/update/<int:pk>/', UpdatePost.as_view()), 

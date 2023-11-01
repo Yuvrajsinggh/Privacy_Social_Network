@@ -15,6 +15,8 @@ const Pmiddle = ({ selectedUser }) => {
   const sessionToken = userData ? userData.token : null;
   const [isFollowing, setIsFollowing] = useState(false);
 
+  const isPrivateAccount = selectedUser && selectedUser.privacy_status
+
   const handleEditClick = () => {
     setIsEditing(true);
   };
@@ -27,7 +29,6 @@ const Pmiddle = ({ selectedUser }) => {
     setIsEditing(false);
   };
 
-
   useEffect(() => {
     const fetchUserDataAndPostsAndFollows = async () => {
       if (selectedUser) {
@@ -38,7 +39,7 @@ const Pmiddle = ({ selectedUser }) => {
         });
 
         setUser({
-          image: 'https://images.unsplash.com/photo-1652437225670-f7969e367375?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1NXx0b3dKWkZza3BHZ3x8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60',
+          image: "http://127.0.0.1:8000" + selectedUser.profile_picture,
           username: selectedUser.username,
           displayName: selectedUser.first_name + " " + selectedUser.last_name,
           anonymousName: selectedUser.anonymous_name,
@@ -52,6 +53,14 @@ const Pmiddle = ({ selectedUser }) => {
           },
         });
         setIsFollowing(followStatusResponse.data.success && followStatusResponse.data.following.some(item => item.follows_id === selectedUser.id));
+
+        const postsResponse = await axios.get(`http://127.0.0.1:8000/posts/otheruserposts/${selectedUser.id}/`);
+  
+        // Separate posts into anonymous and non-anonymous
+        const { anonymous_posts, non_anonymous_posts } = postsResponse.data;
+        // setAnonymousPosts(anonymous_posts);
+        setNonAnonymousPosts(non_anonymous_posts);
+        console.log(postsResponse.data)
       }
 
       else {
@@ -60,6 +69,7 @@ const Pmiddle = ({ selectedUser }) => {
           Authorization: `Token ${sessionToken}`,
         },
       });
+      console.log(userResponse)
       const userId = userResponse.data.id;
 
       const followsRespnse = await axios.get(`http://127.0.0.1:8000/user/followcount/${userId}/`, {
@@ -69,14 +79,14 @@ const Pmiddle = ({ selectedUser }) => {
       });
 
       setUser({
-        image: 'https://images.unsplash.com/photo-1652437225670-f7969e367375?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1NXx0b3dKWkZza3BHZ3x8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60',
+        image: "http://127.0.0.1:8000" + userResponse.data.profile_picture,
         username: userResponse.data.username,
         displayName: userResponse.data.first_name + " " + userResponse.data.last_name,
         anonymusName: userResponse.data.anonymous_name,
         followers: followsRespnse.data.followers_count, 
-        following: followsRespnse.data.following_count, 
+        following: followsRespnse.data.following_count,
       });
-    }
+
       const postsResponse = await axios.get('http://127.0.0.1:8000/posts/userposts/', {
         headers: {
           Authorization: `Token ${sessionToken}`,
@@ -85,14 +95,17 @@ const Pmiddle = ({ selectedUser }) => {
 
       // Separate posts into anonymous and non-anonymous
       const { anonymous_posts, non_anonymous_posts } = postsResponse.data;
-
       setAnonymousPosts(anonymous_posts);
       setNonAnonymousPosts(non_anonymous_posts);
     };
-
+  }
     fetchUserDataAndPostsAndFollows();
   }, [selectedUser, isFollowing]);
+
+
   const displayPosts = showAnonymousPosts ? anonymousPosts : nonAnonymousPosts;
+  const sortedPosts = displayPosts.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
 
   const handleFollowClick = async () => {
     if (isFollowing) {
@@ -159,26 +172,40 @@ const Pmiddle = ({ selectedUser }) => {
       </div>
       <div className="mt-6">
         <div className="flex items-center mb-4">
-          <ul className="flex w-full justify-around">
-            <li className={showAnonymousPosts ? 'hover:border-b-2 border-black' : ''}
-              onClick={() => toggleAnonymousPosts(true)}
-            >
-              Anonymous Posts
-            </li>
-            <li className={!showAnonymousPosts ? 'hover:border-b-2 border-black' : ''}
-              onClick={() => toggleAnonymousPosts(false)}
-            >
-              Normal Posts
-            </li>
-          </ul>
+          {selectedUser && selectedUser.id !== userData.id ? (
+            <ul className="flex w-full justify-around">
+              <li className={!showAnonymousPosts ? 'hover:border-b-2 border-black' : ''}
+                onClick={() => toggleAnonymousPosts(false)}
+              >
+                Normal Posts
+              </li>
+            </ul>
+          ) : (
+            <ul className="flex w-full justify-around">
+              <li className={showAnonymousPosts ? 'hover:border-b-2 border-black' : ''}
+                onClick={() => toggleAnonymousPosts(true)}
+              >
+                Anonymous Posts
+              </li>
+              <li className={!showAnonymousPosts ? 'hover:border-b-2 border-black' : ''}
+                onClick={() => toggleAnonymousPosts(false)}
+              >
+                Normal Posts
+              </li>
+            </ul>
+          )}
         </div>
-        <ul>
-          {displayPosts.map((post) => (
-            <li key={post.id}>
-              <Post post={post} postId={post.id}/>
-            </li>
-          ))}
-        </ul>
+        {isPrivateAccount && !isFollowing ? (
+          <p className='w-full h-full text-center'>This Account is Private. Follow it to see the posts.</p>
+        ) : (
+          <ul>
+            {sortedPosts.map((post) => (
+              <li key={post.id}>
+                <Post post={post} postId={post.id}/>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       {isEditing && <EditProfileModal onClose={handleCloseModal} isOpen={isEditing}/>}
     </div>

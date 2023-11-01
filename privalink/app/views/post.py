@@ -7,6 +7,8 @@ from app.serializer import PostSerializer, CommentSerializer, PostLikeSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.shortcuts import get_object_or_404
+from app.models import User
 
 
 
@@ -121,6 +123,51 @@ class RetieveUserPosts(generics.ListAPIView):
             "anonymous_posts": anonymous_posts,
             "non_anonymous_posts": non_anonymous_posts
         })
+
+class RetrieveOtherUserPosts(generics.ListAPIView):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['pk']
+        user = get_object_or_404(User, id=user_id)
+
+        # Check the privacy status of the user
+        if user.privacy_status:
+            return Post.objects.filter(user=user)
+        else:
+            # If privacy_status is not 'on', return the user's posts
+            user_posts = Post.objects.filter(user=user)
+            return user_posts
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # Serialize the posts
+        serialized_posts = [self.serializer_class(post).data for post in queryset]
+
+        non_anonymous_posts = []
+        anonymous_posts = []
+
+        for post in serialized_posts:
+            if post['anonymous_status']:
+                anonymous_posts.append(post)
+            else:
+                non_anonymous_posts.append(post)
+
+        user_id = self.kwargs['pk']
+        user = get_object_or_404(User, id=user_id)
+        privacy_status = user.privacy_status
+
+        # Include the privacy status in the response
+        response_data = {
+            "success": True,
+            "anonymous_posts": anonymous_posts,
+            "non_anonymous_posts": non_anonymous_posts,
+            "privacy_status": privacy_status,
+        }
+
+        return Response(response_data)
+
 
 class LikePost(APIView):
     authentication_classes = [TokenAuthentication]

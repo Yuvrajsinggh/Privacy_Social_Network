@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+
 const EditProfileModal = ({ onClose, isOpen }) => {
   const [formData, setFormData] = useState({
     username: '', 
     displayName: '',
-    //image: 'https://images.unsplash.com/photo-1652437225670-f7969e367375?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDE1NXx0b3dKWkZza3BHZ3x8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60', 
+    image: null,
   });
 
   const userData = JSON.parse(localStorage.getItem('userData'));
@@ -13,12 +14,6 @@ const EditProfileModal = ({ onClose, isOpen }) => {
 
   const [first_name, last_name] = formData.displayName.split(" ");
 
-  const updatedData = {
-    first_name: first_name,
-    last_name: last_name,
-    username: formData.username,
-    //image: formData.image,
-  };
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -32,9 +27,25 @@ const EditProfileModal = ({ onClose, isOpen }) => {
 
   const handleSubmit = async () => {
     try {
+
+      const updatedData = new FormData();
+
+      // Add fields to FormData
+      if (formData.username) {
+        updatedData.append('username', formData.username);
+      }
+      if (formData.displayName) {
+        updatedData.append('first_name', first_name);
+        updatedData.append('last_name', last_name);
+      }
+      if (formData.image) {
+        updatedData.append('profile_picture', formData.image);
+      }
+
       const response = await axios.put('http://127.0.0.1:8000/user/update/', updatedData, {
         headers: {
           Authorization: `Token ${sessionToken}`,
+          'Content-Type': 'multipart/form-data',
         },
       }); 
       if (response.data.success) {

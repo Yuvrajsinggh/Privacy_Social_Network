@@ -6,10 +6,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'username', 'anonymous_name','password', 'privacy_status']
+        fields = ['id', 'email', 'first_name', 'last_name', 'username', 'profile_picture', 'anonymous_name', 'password', 'privacy_status']
 
     def create(self, validated_data):
         groups_data = validated_data.pop('groups', [])  # Remove groups from validated_data
+
         user = User.objects.create(**validated_data)
         
         # Add the user to groups using .set()
@@ -24,6 +25,8 @@ class UserLoginSerializer(serializers.Serializer):
 
 class PostSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    user_profile_picture = serializers.SerializerMethodField()
+    display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -36,6 +39,18 @@ class PostSerializer(serializers.ModelSerializer):
         if user:
             return user.username
         return "Anonymous"
+    
+    def get_display_name(self, obj):
+        user = obj.user
+        if user:
+            return user.first_name + " " + user.last_name
+        return "Anonymous"
+
+    def get_user_profile_picture(self, obj):
+        user = obj.user
+        if user and user.profile_picture:
+            return user.profile_picture.url
+        return None 
     
     def to_representation(self, instance):
         data = super(PostSerializer, self).to_representation(instance)

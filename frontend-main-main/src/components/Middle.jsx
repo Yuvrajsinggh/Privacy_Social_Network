@@ -25,6 +25,9 @@ const Middle = () => {
           console.error('Error fetching posts: ', error);
         }
       };
+
+      const sortedPosts = posts.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
       useEffect(() => {
         if (currentMode === 'normal') {
           fetchPosts('http://127.0.0.1:8000/posts/general/');
@@ -32,6 +35,7 @@ const Middle = () => {
           fetchPosts('http://127.0.0.1:8000/posts/anonymous/');
         }
       }, [currentMode]);
+
   return (
     <>
         <main className='flex h-full min-h-screen flex-col border-l-[0.5px] border-r-[0.5px] border-black w-full'>
@@ -57,31 +61,21 @@ const Middle = () => {
             </div>
                 {currentMode === 'normal' && (
                     <div>
-                        {posts.map((post) => (
+                        {sortedPosts.map((post) => (
                             <div key={post.id}>
                                     <Post post={post} postId={post.id}/>
                             </div>
                         ))}
-                        {/* {postIds.map((postId, index) => (
-                        <div key={postId}>
-                            <Post postId={postId} post={posts[index]}/>
-                        </div>
-                        ))} */}
                     </div>
                 )}
 
                 {currentMode === 'anonymous' && (
                     <div>
-                        {posts.map((post) => (
+                        {sortedPosts.map((post) => (
                             <div key={post.id}>
                                     <Post post={post} postId={post.id}/>
                             </div>
                         ))}
-                        {/* {postIds.map((postId, index) => (
-                        <div key={postId}>
-                            <Post postId={postId} post={posts[index]}/>
-                        </div>
-                        ))} */}
                     </div>
                 )}
         </main>
